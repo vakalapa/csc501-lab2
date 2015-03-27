@@ -11,6 +11,21 @@
  */
 SYSCALL init_bsm()
 {
+	STATWORD ps;
+	disable(ps);
+
+	int i = 0;
+
+	for(i=0;i<NUM_BS;i++){
+		bsm_tab[i].bs_status = BSM_UNMAPPED;
+		bsm_tab[i].bs_pid = -1;
+		bsm_tab[i].bs_sem = 0;
+		bsm_tab[i].bs_npages = 0;
+		bsm_tab[i].bs_vpno = BASE_VPAGE_NUM;
+		}
+	restore(ps);
+	printf("in init_bsm\n");
+	return OK;
 }
 
 /*-------------------------------------------------------------------------

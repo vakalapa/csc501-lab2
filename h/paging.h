@@ -87,6 +87,7 @@ SYSCALL write_bs(char *, bsd_t, int);
 #define FRM_UNMAPPED	0
 #define FRM_MAPPED	1
 
+#define INVALID -1
 #define FR_PAGE		0
 #define FR_TBL		1
 #define FR_DIR		2

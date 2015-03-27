@@ -210,6 +210,11 @@ sysinit()
 
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
 
+	/* Let the DEMAND start 
+	Here goes the PAGING flow
+	*/
+	init_bsm();
+	init_frm();
 
 	return(OK);
 }

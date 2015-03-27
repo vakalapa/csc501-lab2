@@ -8,9 +8,30 @@
  * init_frm - initialize frm_tab
  *-------------------------------------------------------------------------
  */
+
 SYSCALL init_frm()
 {
-  kprintf("To be implemented!\n");
+/*
+Initializing all the required frame tabs. Called in initialize
+*/
+	STATWORD ps;	
+    disable(ps);
+
+  int i=0;
+
+  for(i=0;i<NBPG;i++){
+	frm_tab[i].fr_status= FRM_UNMAPPED;
+	frm_tab[i].fr_pid= -1;
+	frm_tab[i].fr_vpno= VPNO_BASE;
+	frm_tab[i].fr_refcnt= 0;
+	frm_tab[i].fr_type= INVALID;
+	frm_tab[i].fr_dirty= 0;
+	frm_tab[i].fr_loadtime= 0;
+	
+  }
+  kprintf("in init frame!\n");
+
+  enable(ps);
   return OK;
 }
 

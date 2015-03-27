@@ -41,7 +41,22 @@ Initializing all the required frame tabs. Called in initialize
  */
 SYSCALL get_frm(int* avail)
 {
-  kprintf("To be implemented!\n");
+  int i;
+
+  for(i=0;i<NBPG;i++){
+	if(frm_tab[i].fr_status == FRM_UNMAPPED){
+		*avail=i;
+		return OK;
+	}
+  }
+
+  if(page_replace_policy == FIFO){
+	printf("** get_frm FIFO coming soon**\n");
+	return SYSERR;
+  }else if(page_replace_policy == LRU){
+	  printf("** get_frm LRU coming soon**\n");
+	return SYSERR;
+  }
   return OK;
 }
 

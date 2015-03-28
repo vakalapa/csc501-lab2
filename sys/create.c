@@ -96,6 +96,48 @@ SYSCALL create(procaddr,ssize,priority,name,nargs,args)
 	*--saddr = 0;		/* %edi */
 	*pushsp = pptr->pesp = (unsigned long)saddr;
 
+	/* Create a page directory for this process */
+
+	int new_frame;	
+	pd_t *pd_p;	
+
+	if(get_frm(&new_frame)==SYSERR)	{	
+		kprintf("\nCreate Error: Frame not found for allocating PDBR\n");	
+		return SYSERR;	
+		}	
+	proctab[pid].pdbr = (unsigned long)((FRAME0+new_frame)*NBPG);
+	#if 0	
+	kprintf("\n\n\t[%s:%d] New Process's PDBR = %u\n\n",__FILE__,__LINE__,proctab[pid].pdbr);
+	#endif	
+
+	frm_tab[new_frame].fr_status = FRM_MAPPED;	
+	frm_tab[new_frame].fr_type = FR_DIR;	
+	frm_tab[new_frame].fr_pid = pid;	
+	pd_p = (pd_t*)((FRAME0+new_frame)*NBPG);
+
+	/* Map the first 4 entries of the directory to global page tables */
+	
+	for(i=0;i<4;i++)	{	
+		pd_p->pd_pres = 1;	
+		pd_p->pd_write = 1;		
+		pd_p->pd_user = 0;	
+		pd_p->pd_pwt = 0;		
+		pd_p->pd_pcd = 0;	
+		pd_p->pd_acc = 0;	
+		pd_p->pd_mbz = 0;	
+		pd_p->pd_fmb = 0;	
+		pd_p->pd_global = 0;	
+		pd_p->pd_avail = 0;	
+		pd_p->pd_base = FRAME0+i;	
+		pd_p++;	
+	}	
+	
+	for(i=4;i<1024;i++)	{	
+		pd_p->pd_write = 1;		
+		pd_p++;	
+	}
+
+	
 	restore(ps);
 
 	return(pid);

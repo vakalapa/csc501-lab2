@@ -68,6 +68,28 @@ SYSCALL free_bsm(int i)
  */
 SYSCALL bsm_lookup(int pid, long vaddr, int* store, int* pageth)
 {
+	STATWORD ps;	
+	disable(ps);	
+	int i=0;	
+
+	virt_addr_t *virt_addr; 
+	unsigned int pg_offset; 
+	virt_addr = &vaddr; 
+
+	pg_offset = vaddr/NBPG; 
+
+	for(i=0; i<NUM_BS; i++) {		
+		if(bsm_tab[i].bs_pid == pid)		
+			{			
+			if(pg_offset < bsm_tab[i].bs_vpno || pg_offset > bsm_tab[i].bs_vpno + bsm_tab[i].bs_npages) 			
+				return SYSERR;			
+			*store = i; 		
+			*pageth = pg_offset-bsm_tab[i].bs_vpno; 	
+			}	
+		}	
+	restore(ps);	
+	return OK;
+
 }
 
 

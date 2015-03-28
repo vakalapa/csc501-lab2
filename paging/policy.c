@@ -13,8 +13,11 @@ extern int page_replace_policy;
 SYSCALL srpolicy(int policy)
 {
   /* sanity check ! */
+  if(policy != FIFO && policy != LRU)
+  	return SYSERR;  
+  page_replace_policy = policy;
 
-  kprintf("To be implemented!\n");
+  kprintf("*** In SR Policy ***\n");
 
   return OK;
 }

@@ -95,7 +95,11 @@ SYSCALL write_bs(char *, bsd_t, int);
 #define FIFO		3
 #define GCM		4
 
+#define BS_MAX	16
+
 #define MAX_ID          9              /* You get 10 mappings, 0 - 9 */
+
+#define VPNO_BASE	4096
 
 #define BACKING_STORE_BASE	0x00600000
 #define BACKING_STORE_UNIT_SIZE 0x00100000

@@ -34,6 +34,23 @@ SYSCALL init_bsm()
  */
 SYSCALL get_bsm(int* avail)
 {
+  STATWORD ps;
+  disable(ps);
+
+  int i=0;
+
+  for(i=0;i<BS_MAX;i++){
+  	if(bsm_tab[i].bs_status== BSM_UNMAPPED){
+		*avail=i;
+		restore(ps);
+		return OK;
+	}
+  }
+
+  restore(ps);
+  printf("**** in GET BSM failed to retrive any ****\n");
+  return SYSERR;
+
 }
 
 

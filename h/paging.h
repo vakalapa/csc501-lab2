@@ -48,7 +48,8 @@ typedef struct{
   int bs_vpno;				/* starting virtual page number */
   int bs_npages;			/* number of pages in the store */
   int bs_sem;				/* semaphore mechanism ?	*/
-  int bs_ispriv;			/* private mapping*/
+  int bs_ispriv;			/* the BS is private to a process 
+  						and cant be accessed by other processes */
 } bs_map_t;
 
 typedef struct{
@@ -60,13 +61,27 @@ typedef struct{
   int fr_dirty;
   void *cookie;				/* private data structure	*/
   unsigned long int fr_loadtime;	/* when the page is loaded 	*/
+  int frm_id;
+  int nxt_frm;
+  int prev_frm;
 }fr_map_t;
 
 extern bs_map_t bsm_tab[];
 extern fr_map_t frm_tab[];
+
+/* Global Page Tables*/
+extern int frm_fifo_hd;
+extern int frm_fifo_tl;
+
+/* Time count for LRU */
+extern unsigned long int timeCount;
 /* Prototypes for required API calls */
 SYSCALL xmmap(int, bsd_t, int);
 SYSCALL xunmap(int);
+/* FIFO calls */
+int get_frm_FIFO();
+
+void insert_frm_fifo(int);
 
 /* given calls for dealing with backing store */
 
@@ -75,12 +90,26 @@ SYSCALL release_bs(bsd_t);
 SYSCALL read_bs(char *, bsd_t, int);
 SYSCALL write_bs(char *, bsd_t, int);
 
+SYSCALL evict_process_frames(int pid);
+void frm_invalidate_TLB(int frm_num);
+
+/* Frame specific functions */
+SYSCALL bsm_lookup(int pid, long vaddr, int* store, int* pageth);
+
+/* Finding a frame using LRU policy */
+int get_frm_LRU();
+/* Updating the frame load times */
+void update_frms_LRU();
+
+
+
 #define NBPG		4096	/* number of bytes per page	*/
 #define FRAME0		1024	/* zero-th frame		*/
 
 //default 3072 frames --> 1024+3072=4096=16M
 //#define NFRAMES 	3072	/* number of frames		*/
-#define NFRAMES 	8	/* number of frames		*/
+#define NFRAMES 	1024	/* number of frames		*/
+#define INVALID_FRM -1
 
 #define BSM_UNMAPPED	0
 #define BSM_MAPPED	1
@@ -88,22 +117,23 @@ SYSCALL write_bs(char *, bsd_t, int);
 #define FRM_UNMAPPED	0
 #define FRM_MAPPED	1
 
-#define INVALID -1
+
 #define FR_PAGE		0
 #define FR_TBL		1
 #define FR_DIR		2
 
 #define FIFO		3
-#define GCM		4
+#define LRU		4
 
-#define BS_MAX	16
+#define MAX_ID          16              /* You get 16 mappings, 0 - 15 */
+#define NUM_BS	16
 
-#define MAX_ID          9              /* You get 10 mappings, 0 - 9 */
-
-#define VPNO_BASE	4096
-
-#define BACKING_STORE_BASE	0x00600000
-#define BACKING_STORE_UNIT_SIZE 0x00100000
+#define BACKING_STORE_BASE	0x00800000
+#define BACKING_STORE_UNIT_SIZE 0x00080000
 
 #define NUM_PAGES_PER_BS (BACKING_STORE_UNIT_SIZE/NBPG)
 
+
+#define BASE_VPAGE_NUM 4096
+
+#define VVAKKAL_DP_DEBUG 0

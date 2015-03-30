@@ -76,7 +76,7 @@ struct	pentry	{
         int     store;                  /* backing store for vheap      */
         int     vhpno;                  /* starting pageno for vheap    */
         int     vhpnpages;              /* vheap size                   */
-        struct mblock *vmemlist;        /* vheap list              	*/
+        struct mblock vmemlist;        /* vheap list              	*/
 };
 
 

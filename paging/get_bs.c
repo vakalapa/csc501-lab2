@@ -16,7 +16,7 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
 	bs_map_t *bsm_entry;
  	bsm_entry = &bsm_tab[bs_id];
 
-	if(npages<=0 || npages>128 || bs_id < 0 || bs_id >= MAX_ID)
+	if(check_pages(bs_id,npages)==SYSERR)
 	{
 		restore(ps);
 		return SYSERR;
@@ -25,15 +25,18 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
   /* requests a new mapping of npages with ID map_id */
 	if(bsm_entry->bs_status == BSM_MAPPED)
 	{
-		if(bsm_entry->bs_ispriv == 1 || bsm_entry->bs_sem == 1)
+		if(bsm_entry->bs_ispriv == 1 )
 		{
+			restore(ps);
+			return SYSERR;
+		}
+		if(bsm_entry->bs_sem == 1){
 			restore(ps);
 			return SYSERR;
 		}
 
 		else
 		{
-//		kprintf("\n\n\t[GET_BS]IF-ELSE BSM = %d\n\n",bs_id);
 			bsm_entry->bs_pid = currpid;
 			bsm_entry->bs_npages = npages;
 			bsm_entry->bs_ispriv = 0;
@@ -45,7 +48,6 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
 
 	else
 	{
-//	kprintf("\n\n\t[GET_BS]ELSE BSM = %d\n\n",bs_id);
 		bsm_entry->bs_pid = currpid;
 		bsm_entry->bs_npages = npages;
 		bsm_entry->bs_ispriv = 0;
@@ -54,6 +56,14 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
 		return bsm_entry->bs_npages;
 	}
   
+}
+
+int check_pages(bsd_t bs_id, unsigned int npages){
+	if(npages<=0 || npages>128 || bs_id < 0 || bs_id >= MAX_ID)
+		{			
+			return SYSERR;
+		}
+	return OK;
 }
 
 

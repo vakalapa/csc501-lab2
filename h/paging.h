@@ -106,9 +106,7 @@ void update_frms_LRU();
 #define NBPG		4096	/* number of bytes per page	*/
 #define FRAME0		1024	/* zero-th frame		*/
 
-//default 3072 frames --> 1024+3072=4096=16M
-//#define NFRAMES 	3072	/* number of frames		*/
-#define NFRAMES 	1024	/* number of frames		*/
+#define NFRAMES 	20	/* number of frames		*/
 #define INVALID_FRM -1
 
 #define BSM_UNMAPPED	0
@@ -136,4 +134,4 @@ void update_frms_LRU();
 
 #define BASE_VPAGE_NUM 4096
 
-#define VVAKKAL_DP_DEBUG 0
+#define DEBUG_PAGING 0

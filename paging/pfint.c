@@ -35,7 +35,7 @@ SYSCALL pfint()
 	v_addr = read_cr2();
 
 //	kprintf("\t[PFINT.C:37] System's PDBR =  %u\n",read_cr3());
-	//if(VVAKKAL_DP_DEBUG)
+	//if(DEBUG_PAGING)
 //		kprintf("\t[PFINT.C:39] interrupt at address %ud\n",v_addr);
 	virt_addr = (virt_addr_t*)&v_addr;
 	//kprintf("\t[PFINT.C:36] virt_addr = %u\n",virt_addr);
@@ -104,7 +104,7 @@ case2:
 			/*bs = 0;
 			pg_offset_bs = 0;*/
 			temp_bs_content = BACKING_STORE_BASE+bs*NBPG;
-//#if VVAKKAL_DP_DEBUG
+//#if DEBUG_PAGING
 //	kprintf("\n\n\t[%s:%d] Trying to get a frame \n\n",__FILE__,__LINE__);
 //#endif
 			if(get_frm(&new_frame)==SYSERR)
@@ -168,7 +168,7 @@ int create_page_table()
 		return -1;/* Frame could not be found */
 	}
 
-	frame_addr = (FRAME0 + frame_number)*NBPG;
+	frame_addr = get_frame_address(frame_number);
 
 	page_table = (pt_t*)frame_addr;
 
@@ -188,8 +188,12 @@ int create_page_table()
 		page_table[i].pt_write = 0;
 	}
 
-//	kprintf("\n\t[PFINT.C:136] Allocated frame %d for the page table\n",frame_number);
+	kprintf("\n\t[PFINT.C:136] Allocated frame %d for the page table\n",frame_number);
 
 	return frame_number;
 	
+}
+
+int get_frame_address(int frame_number){
+	return (FRAME0 + frame_number)*NBPG;
 }

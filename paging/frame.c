@@ -19,7 +19,7 @@ unsigned long int timeCount;
  */
 SYSCALL init_frm()
 {
-//  kprintf("To be implemented!\n");
+
 	STATWORD ps;
 	disable(ps);
 	int i = 0;
@@ -47,15 +47,13 @@ SYSCALL init_frm()
  */
 SYSCALL get_frm(int* avail)
 {
-//  kprintf("To be implemented!\n");
-
 	int i;
 
 	for(i=0;i<NFRAMES;i++)
 	{
 		if(frm_tab[i].fr_status == FRM_UNMAPPED)
 		{
-	//	kprintf("\n\t*********Selecting Frame %d: \n",i);
+
 			*avail = i;
 			return OK;
 		}
@@ -65,7 +63,7 @@ SYSCALL get_frm(int* avail)
 		i = get_frm_FIFO();
 		kprintf("\nReplacing Frame %d\n",i);
 		free_frm(i);
-//		kprintf("\nReplacing the Frame Number %d\n",i+FRAME0);
+		kprintf("\nReplacing the Frame Number %d\n",i+FRAME0);
 		*avail = i;
 		return OK;
 	}
@@ -109,7 +107,7 @@ SYSCALL free_frm(int frm_num)
 	/* Let a be vp*4096 (the first virtual address on page vp).*/
 	addr_value = (vp*NBPG);
 	a = &addr_value;
-#if 0
+#if DEBUG_PAGING
 	kprintf("\n\n\t[%s:%d]Virtual Page Number = %d Index = %d ADDR_VALUE=%u A=%u\n\n",__FILE__,__LINE__,vp,i,addr_value,*a);
 #endif
 
@@ -124,7 +122,7 @@ SYSCALL free_frm(int frm_num)
 
 	/* Let pd point to the page directory of process pid. */
 	pd = proctab[pid].pdbr;
-#if 0
+#if DEBUG_PAGING
 	kprintf("\n\n\t[%s:%d]PID= %d PDBR = %u P=%d\n\n",__FILE__,__LINE__,pid,pd,p);
 #endif
 
@@ -161,7 +159,7 @@ SYSCALL free_frm(int frm_num)
 		write_bs((i+FRAME0)*NBPG,bs,bs_pgoffset);
 	}
 		
-//  kprintf("To be implemented!\n");
+
   	return OK;
 }
 
@@ -190,9 +188,10 @@ int get_frm_FIFO()
 void insert_frm_fifo(int frm_num)
 {
 	int temp = frm_fifo_tl;
-//#if VVAKKAL_DP_DEBUG
-//	kprintf("\n\n\t[%s:%d]Inserting Frame %d into FIFO queue\n\n",__FILE__,__LINE__,frm_num);
-//#endif
+	
+#if DEBUG_PAGING
+	kprintf("\n\n\t[%s:%d]Inserting Frame %d into FIFO queue\n\n",__FILE__,__LINE__,frm_num);
+#endif
 
 	frm_fifo_tl = frm_num;
 	frm_tab[frm_fifo_tl].prev_frm = temp;
@@ -202,7 +201,10 @@ void insert_frm_fifo(int frm_num)
 
 	if(frm_fifo_hd==-1)
 		frm_fifo_hd = frm_fifo_tl;
-//	kprintf("\n\n\t[%s:%d]Inserting Frame %d into FIFO queue: H = %d T=%d\n\n",__FILE__,__LINE__,frm_num,frm_fifo_hd,frm_fifo_tl);
+#if DEBUG_PAGING
+	kprintf("\n\n\t[%s:%d]Inserting Frame %d into FIFO queue: H = %d T=%d\n\n",__FILE__,__LINE__,frm_num,frm_fifo_hd,frm_fifo_tl);
+#endif
+
 }
 
 SYSCALL evict_process_frames(int pid)

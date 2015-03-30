@@ -20,8 +20,7 @@ WORD	*vgetmem(unsigned int nbytes)
 
 	disable(ps);
 	nbytes = (unsigned int)roundmb(nbytes);
-	
-//	kprintf("To be implemented!\n");
+
 	pptr = &proctab[currpid];
 	vmlist = &pptr->vmemlist;
 

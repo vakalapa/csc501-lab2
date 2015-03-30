@@ -38,7 +38,7 @@ SYSCALL get_bsm(bsd_t* avail)
 	int i = 0;
 	for(i=0;i<NUM_BS;i++)
 	{
-#if 0
+#if DEBUG_PAGING
 	kprintf("\n\n\n\t\t****[%s:%d]bsm_tab[%d].bs_status = %d****\n\n",__FILE__,__LINE__,i,bsm_tab[i].bs_status);
 #endif
 
@@ -82,7 +82,9 @@ SYSCALL bsm_lookup(int pid, long vaddr, int* store, int* pageth)
 	{
 		if(bsm_tab[i].bs_pid == pid)
 		{
-			if(pg_offset < bsm_tab[i].bs_vpno || pg_offset > bsm_tab[i].bs_vpno + bsm_tab[i].bs_npages)
+			if(pg_offset < bsm_tab[i].bs_vpno )
+				return SYSERR;
+			if(pg_offset > bsm_tab[i].bs_vpno + bsm_tab[i].bs_npages)
 				return SYSERR;
 			*store = i;
 			*pageth = pg_offset-bsm_tab[i].bs_vpno;

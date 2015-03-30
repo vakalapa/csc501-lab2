@@ -48,9 +48,7 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	}
 	if(get_bsm(&bs)==SYSERR)
 	{
-#if 1
 	kprintf("\n\n\t[%s:%d] Get BSM Failed!\n\n",__FILE__,__LINE__);
-#endif
 		restore(ps);
 		return SYSERR;
 	}

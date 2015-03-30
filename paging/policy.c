@@ -14,10 +14,11 @@ SYSCALL srpolicy(int policy)
 {
   /* sanity check ! */
   if(policy != FIFO && policy != LRU)
-  	return SYSERR;  
+  	return SYSERR;
+
   page_replace_policy = policy;
 
-  kprintf("*** In SR Policy ***\n");
+  kprintf("To be implemented!\n");
 
   return OK;
 }

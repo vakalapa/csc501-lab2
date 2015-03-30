@@ -24,6 +24,7 @@ extern	int	start();
 
 LOCAL		sysinit();
 
+
 /* Declarations of major kernel variables */
 struct	pentry	proctab[NPROC]; /* process table			*/
 int	nextproc;		/* next process slot to use in create	*/
@@ -33,6 +34,8 @@ struct	qent	q[NQENT];	/* q table (see queue.c)		*/
 int	nextqueue;		/* next slot in q structure to use	*/
 char	*maxaddr;		/* max memory address (set by sizmem)	*/
 struct	mblock	memlist;	/* list of free memory blocks		*/
+bs_map_t bsm_tab[NUM_BS];
+fr_map_t frm_tab[NFRAMES];
 #ifdef	Ntty
 struct  tty     tty[Ntty];	/* SLU buffers and mode control		*/
 #endif
@@ -48,6 +51,7 @@ int	console_dev;		/* the console device			*/
 
 /*  added for the demand paging */
 int page_replace_policy = FIFO;
+
 
 /************************************************************************/
 /***				NOTE:				      ***/
@@ -134,6 +138,9 @@ sysinit()
 	struct	mblock	*mptr;
 	SYSCALL pfintr();
 
+	/* Install the page fault handler */
+	set_evec(14,(u_long)pfintr);
+
 	
 
 	numproc = 0;			/* initialize system variables */
@@ -210,68 +217,65 @@ sysinit()
 
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
 
-	/* Let the DEMAND start 
-	Here goes the PAGING flow
-	*/
+	/* Demand Paging */
+	timeCount=0;
 	init_bsm();
 	init_frm();
-	int frame_num = 0;	
-	pt_t *pt_p; 
+	int frame_num = 0;
+	pt_t *pt_p;
 	int new_page_frame;
-
-	for(i=0;i<4;i++){
-		if(get_frm(&new_page_frame)==SYSERR)			
+	for(i=0;i<4;i++)
+	{
+		if(get_frm(&new_page_frame)==SYSERR)
 			return SYSERR;
-		pt_p = NBPG*(new_page_frame+FRAME0);		
-		frm_tab[new_page_frame].fr_pid = NULLPROC;		
-		frm_tab[new_page_frame].fr_type = FR_TBL;		
-		frm_tab[new_page_frame].fr_status = FRM_MAPPED;		
-		for(j=0;j<1024;j++)		{			
-			pt_p->pt_pres=1;			
-			pt_p->pt_write = 1;			
-			pt_p->pt_user = 0; /* Not accessible to the user as this is the real memory page table */	
-			pt_p->pt_pwt = 0; /* No write allowed on the real memory page table */			
-			pt_p->pt_pcd = 0;			
-			pt_p->pt_acc = 0; /* Not yet accessed */		
-			pt_p->pt_dirty = 0; /* No changes yet */		
-			pt_p->pt_mbz = 0;		
-			pt_p->pt_global = 0;	
-			pt_p->pt_avail = 0;		
-			pt_p->pt_base = i*FRAME0+j;		
-			pt_p++;	
+		pt_p = NBPG*(new_page_frame+FRAME0);
+		frm_tab[new_page_frame].fr_pid = NULLPROC;
+		frm_tab[new_page_frame].fr_type = FR_TBL;
+		frm_tab[new_page_frame].fr_status = FRM_MAPPED;
+		for(j=0;j<1024;j++)
+		{
+			pt_p->pt_pres=1;
+			pt_p->pt_write = 1;
+			pt_p->pt_user = 0; /* Not accessible to the user as this is the real memory page table */
+			pt_p->pt_pwt = 0; /* No write allowed on the real memory page table */
+			pt_p->pt_pcd = 0;
+			pt_p->pt_acc = 0; /* Not yet accessed */
+			pt_p->pt_dirty = 0; /* No changes yet */
+			pt_p->pt_mbz = 0;
+			pt_p->pt_global = 0;
+			pt_p->pt_avail = 0;
+			pt_p->pt_base = i*FRAME0+j;
+			pt_p++;
 		}
 	}
 	pd_t *pd_p;
-	int new_dir_frm;	
-
-	if(get_frm(&new_dir_frm)==SYSERR)	
-		return SYSERR;
-	//	kprintf("\n\n\t[SYSINT]Frame %d for directory\n\n",new_dir_frm);	
-	pd_p = (NBPG*(FRAME0+new_dir_frm));	
+	int new_dir_frm;
+	if(get_frm(&new_dir_frm)==SYSERR)
+			return SYSERR;
+//	kprintf("\n\n\t[SYSINT]Frame %d for directory\n\n",new_dir_frm);
+	pd_p = (NBPG*(FRAME0+new_dir_frm));
 	frm_tab[new_dir_frm].fr_pid = NULLPROC;
-	frm_tab[new_dir_frm].fr_type = FR_DIR;	
-	frm_tab[new_dir_frm].fr_status = FRM_MAPPED;	
-
-	frame_num = FRAME0; /* Frame number of the first page table */	
-	for(i=0;i<4;i++){	
-		pd_p->pd_pres = 1;		
-		pd_p->pd_write = 1;		
-		pd_p->pd_user = 0;		
-		pd_p->pd_pwt = 0;	
-		pd_p->pd_pcd = 0;	
-		pd_p->pd_acc = 0;	
-		pd_p->pd_mbz = 0;	
-		pd_p->pd_fmb = 0;		
-		pd_p->pd_global = 0;	
-		pd_p->pd_avail = 0;	
-		pd_p->pd_base = FRAME0+i;	
-		pd_p++;	
+	frm_tab[new_dir_frm].fr_type = FR_DIR;
+	frm_tab[new_dir_frm].fr_status = FRM_MAPPED;
+	frame_num = FRAME0; /* Frame number of the first page table */
+	for(i=0;i<4;i++)
+	{
+		pd_p->pd_pres = 1;
+		pd_p->pd_write = 1;
+		pd_p->pd_user = 0;
+		pd_p->pd_pwt = 0;
+		pd_p->pd_pcd = 0;
+		pd_p->pd_acc = 0;
+		pd_p->pd_mbz = 0;
+		pd_p->pd_fmb = 0;
+		pd_p->pd_global = 0;
+		pd_p->pd_avail = 0;
+		pd_p->pd_base = FRAME0+i;
+		pd_p++;
 	}
 	pptr->pdbr = (unsigned long)(NBPG*(FRAME0+new_dir_frm));
 	write_cr3(proctab[NULLPROC].pdbr);
-
 	enable_paging(); /* enable paging */
-	
 	return(OK);
 }
 

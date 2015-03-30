@@ -21,6 +21,7 @@ SYSCALL init_bsm()
 		bsm_tab[i].bs_sem = 0;
 		bsm_tab[i].bs_npages = 0;
 		bsm_tab[i].bs_vpno = BASE_VPAGE_NUM;
+		bsm_tab[i].bs_id=i;
 	}
 	restore(ps);
 
@@ -36,6 +37,8 @@ SYSCALL get_bsm(bsd_t* avail)
 	STATWORD ps;
 	disable(ps);
 	int i = 0;
+	int bs_id_map =-1;
+	
 	for(i=0;i<NUM_BS;i++)
 	{
 #if DEBUG_PAGING
@@ -47,6 +50,9 @@ SYSCALL get_bsm(bsd_t* avail)
 			*avail=i;
 			restore(ps);
 			return OK;
+		}
+		if(bsm_tab[i].bs_id==i){
+			bs_id_map=1;
 		}
 	}
 

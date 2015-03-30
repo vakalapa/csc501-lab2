@@ -28,7 +28,7 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	long	args;			/* arguments (treated like an	*/
 					/* array in the code)		*/
 {
-//	kprintf("To be implemented!\n");
+
 	int pid;
 	bsd_t bs;
 	STATWORD ps;

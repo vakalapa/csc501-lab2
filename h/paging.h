@@ -50,6 +50,7 @@ typedef struct{
   int bs_sem;				/* semaphore mechanism ?	*/
   int bs_ispriv;			/* the BS is private to a process 
   						and cant be accessed by other processes */
+  int bs_id;
 } bs_map_t;
 
 typedef struct{

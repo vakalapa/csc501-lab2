@@ -15,8 +15,57 @@ WORD	*vgetmem(nbytes)
 	unsigned nbytes;
 {
 
-	kprintf("To be implemented!\n");
-	return( SYSERR );
+	STATWORD ps;	
+
+	struct pentry *pptr;	
+	struct mblock *vmlist,*prev,*nxt,*new_rem;	
+
+	disable(ps);	
+
+	nbytes = (unsigned int)roundmb(nbytes);
+
+	//	kprintf("To be implemented!\n");	pptr = &proctab[currpid];	
+
+	vmlist = &pptr->vmemlist;	
+
+	/* If the list is empty, return SYSERR */	
+
+	if(vmlist->mnext == NULL || nbytes == 0)	{	
+		goto end;	
+
+	}	
+
+	prev = vmlist;	
+	nxt = vmlist->mnext;
+
+	
+	while(nxt!=NULL){	
+		if(nxt->mlen == nbytes)	{	
+			prev->mnext = nxt->mnext;	
+			restore(ps);			
+			return nxt;		
+
+		}		
+		else if(nxt->mlen > nbytes)	{		
+			/* Use the new pointer to create a new mem chunk smaller than nxt */
+			new_rem = nxt+nbytes;		
+			new_rem->mnext = nxt->mnext;	
+			new_rem->mlen = nxt->mlen - nbytes;		
+
+			/* Point the next of prev to this newly created chunk */		
+			prev->mnext = new_rem;		
+			restore(ps);		
+			return nxt;		
+
+		}	
+
+		prev = nxt;		
+		nxt = nxt->mnext;	
+		}
+	end:
+		restore(ps);	
+		return (WORD*)( SYSERR );
+	
 }
 
 

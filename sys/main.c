@@ -73,7 +73,7 @@ void proc1_test3(char *msg, int lck) {
 int main() {
 	int pid1;
 	int pid2;
-
+	
 #if 1
 
 	kprintf("\n1: shared memory\n");

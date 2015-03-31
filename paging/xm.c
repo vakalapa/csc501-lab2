@@ -5,6 +5,8 @@
 #include <proc.h>
 #include <paging.h>
 
+int set_bsm_tab(int i);
+
 
 /*-------------------------------------------------------------------------
  * xmmap - xmmap
@@ -77,21 +79,22 @@ SYSCALL xmunmap(int virtpage )
 					write_bs((j+FRAME0)*NBPG,i,frm_vpno-bs_vpno);
 				}
 			}
-			
+			set_bsm_tab(i);
 		}
-  		bsm_tab[i].bs_sem = 0;
-		bsm_tab[i].bs_pid = -1;
-		bsm_tab[i].bs_vpno = BASE_VPAGE_NUM;
-		bsm_tab[i].bs_npages = 0;
+  		
 	//	bsm_tab[i].bs_status = BSM_UNMAPPED;
 		break;
   	}
-  }
+  } 	
 
-
-  	
-
-//  kprintf("To be implemented!");
   return OK;
+}
+
+int set_bsm_tab(int i){
+			bsm_tab[i].bs_sem = 0;
+			bsm_tab[i].bs_pid = -1;
+			bsm_tab[i].bs_vpno = BASE_VPAGE_NUM;
+			bsm_tab[i].bs_npages = 0;
+	return OK;
 }
 

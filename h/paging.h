@@ -65,6 +65,8 @@ typedef struct{
   int frm_id;
   int nxt_frm;
   int prev_frm;
+  int frm_hd;
+  int frm_t1;
 }fr_map_t;
 
 extern bs_map_t bsm_tab[];
@@ -107,7 +109,7 @@ void update_frms_LRU();
 #define NBPG		4096	/* number of bytes per page	*/
 #define FRAME0		1024	/* zero-th frame		*/
 
-#define NFRAMES 	20	/* number of frames		*/
+#define NFRAMES 	1024	/* number of frames		*/
 #define INVALID_FRM -1
 
 #define BSM_UNMAPPED	0

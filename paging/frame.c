@@ -61,9 +61,7 @@ SYSCALL get_frm(int* avail)
 	if(page_replace_policy == FIFO)
 	{
 		i = get_frm_FIFO();
-		kprintf("\nReplacing Frame %d\n",i);
 		free_frm(i);
-		kprintf("\nReplacing the Frame Number %d\n",i+FRAME0);
 		*avail = i;
 		return OK;
 	}
@@ -74,8 +72,6 @@ SYSCALL get_frm(int* avail)
 		if(i==SYSERR)
 			return SYSERR;
 		
-		kprintf("\nReplacing Frame %d\n",i);
-
 		*avail = i;
 		free_frm(i);
 		return OK;
@@ -132,7 +128,7 @@ SYSCALL free_frm(int frm_num)
 
 	/* Mark the appropriate entry of pt as not present. */
 	pt->pt_pres = 0;
-//	kprintf("\n\n\t Frame %d was previously for Pentry %d and pd_base=%d\n",i,q,pd_p->pd_base);
+
 	frm_invalidate_TLB(i);
 	
 	/* In the inverted page table decrement the reference count of the frame occupied by pt. */
@@ -180,8 +176,6 @@ int get_frm_FIFO()
 		frm_fifo_tl = -1;
 	else
 		frm_tab[frm_fifo_hd].prev_frm = INVALID_FRM;
-
-//	kprintf("\nReplacing Frame %d: H=%d T=%d\n",frm,frm_fifo_hd,frm_fifo_tl);
 
 	return frm;
 }
